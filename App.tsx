@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Project, ActivityLog, Language } from './types';
 import { mockProjects, mockLogs } from './services/geminiService';
 
@@ -289,17 +289,79 @@ const Footer = ({ lang }: { lang: Language }) => (
   </footer>
 );
 
+// --- Terminal Overlay Component ---
+const TerminalOverlay = ({ onComplete, lang }: { onComplete: () => void, lang: Language }) => {
+  const [lines, setLines] = useState<string[]>([]);
+
+  const sequences = {
+    en: [
+      { text: '> INITIALIZING_KERNEL...', delay: 100 },
+      { text: '> LOADING_MODULES [REACT, TS, VITE]...', delay: 600 },
+      { text: '> ESTABLISHING_SECURE_UPLINK...', delay: 1200 },
+      { text: '> COMPILING_DIGITAL_ARTIFACTS...', delay: 1800 },
+      { text: '> ACCESS_GRANTED.', delay: 2400 }
+    ],
+    tr: [
+      { text: '> CEKIRDEK_BASLATILIYOR...', delay: 100 },
+      { text: '> MODULLER_YUKLENIYOR [REACT, TS, VITE]...', delay: 600 },
+      { text: '> GUVENLI_BAGLANTI_KURULUYOR...', delay: 1200 },
+      { text: '> DIJITAL_ESERLER_DERLENIYOR...', delay: 1800 },
+      { text: '> ERISIM_IZNI_VERILDI.', delay: 2400 }
+    ]
+  };
+
+  useEffect(() => {
+    // Reset lines when language or init restarts (though component unmounts usually)
+    setLines([]);
+
+    const sequence = sequences[lang];
+    let timeouts: NodeJS.Timeout[] = [];
+
+    sequence.forEach(({ text, delay }) => {
+      const timeout = setTimeout(() => {
+        setLines(prev => [...prev, text]);
+      }, delay);
+      timeouts.push(timeout);
+    });
+
+    const finishTimeout = setTimeout(onComplete, 2800);
+    timeouts.push(finishTimeout);
+
+    return () => timeouts.forEach(clearTimeout);
+  }, [onComplete, lang]);
+
+  return (
+    <div className="fixed inset-0 z-[100] bg-[#0a0a0c] text-primary font-mono text-sm p-4 md:p-10 flex flex-col justify-end pb-20">
+      {lines.map((line, i) => (
+        <p key={i} className="mb-2 last:animate-pulse">{line}</p>
+      ))}
+      <div className="animate-pulse mt-4">_</div>
+    </div>
+  );
+};
+
 // --- Main Application ---
 
 const App: React.FC = () => {
   const [lang, setLang] = useState<Language>('en');
+  const [isInit, setIsInit] = useState(false);
+
+  const handleInit = () => {
+    setIsInit(true);
+  };
+
+  const onOverlayComplete = () => {
+    setIsInit(false);
+    document.getElementById('projects-section')?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-background-dark">
       <Header lang={lang} setLang={setLang} />
 
       <main className="flex-grow flex flex-col w-full">
-        <Hero lang={lang} onInit={() => { }} />
+        {isInit && <TerminalOverlay onComplete={onOverlayComplete} lang={lang} />}
+        <Hero lang={lang} onInit={handleInit} />
         <Marquee lang={lang} />
 
         <div className="flex flex-col md:flex-row max-w-[1440px] mx-auto w-full border-x border-border-dark flex-grow">
@@ -307,7 +369,7 @@ const App: React.FC = () => {
 
           <div className="flex-1 bg-background-dark border-t md:border-t-0">
             {/* Projects Header */}
-            <div className="border-b border-border-dark px-6 py-8 md:px-12 flex justify-between items-end">
+            <div id="projects-section" className="border-b border-border-dark px-6 py-8 md:px-12 flex justify-between items-end">
               <div>
                 <h2 className="text-white text-3xl md:text-4xl font-bold tracking-tight mb-2 uppercase">{translations[lang].indexOf}</h2>
                 <p className="text-gray-500 font-mono text-sm">
