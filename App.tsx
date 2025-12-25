@@ -202,6 +202,12 @@ const Sidebar = ({ lang }: { lang: Language }) => (
 
 const ProjectCard: React.FC<{ project: Project }> = ({ project }) => (
   <a className="group border-b border-r border-border-dark bg-surface-dark p-8 flex flex-col justify-between h-[320px] border-glitch relative overflow-hidden" href="#">
+    {/* Target Lock Corners */}
+    <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-primary opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:top-2 group-hover:left-2"></div>
+    <div className="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-primary opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:top-2 group-hover:right-2"></div>
+    <div className="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-primary opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:bottom-2 group-hover:left-2"></div>
+    <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-primary opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:bottom-2 group-hover:right-2"></div>
+
     <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-100 transition-opacity">
       <span className="material-symbols-outlined text-primary">arrow_outward</span>
     </div>
@@ -589,6 +595,38 @@ const App: React.FC = () => {
   const [lang, setLang] = useState<Language>('en');
   const [isInit, setIsInit] = useState(false);
   const [isLogsOpen, setIsLogsOpen] = useState(false);
+  const [projects, setProjects] = useState<Project[]>(mockProjects['en']); // Start with mock, then fetch
+
+  useEffect(() => {
+    const fetchGitHubProjects = async () => {
+      try {
+        const response = await fetch('https://api.github.com/users/chelebyy/repos?sort=pushed&per_page=100');
+        if (!response.ok) throw new Error('GitHub API Error');
+        const data = await response.json();
+
+        const mappedProjects = data
+          .filter((repo: any) => !repo.fork && repo.description) // Filter forks and empty desc
+          .sort((a: any, b: any) => b.stargazers_count - a.stargazers_count) // Sort by stars
+          .slice(0, 6) // Limit to top 6
+          .map((repo: any, index: number) => ({
+            id: repo.id.toString(),
+            name: repo.name,
+            description: repo.description,
+            tags: [repo.language, 'GitHub'].filter(Boolean).slice(0, 3),
+            stars: repo.stargazers_count >= 1000 ? (repo.stargazers_count / 1000).toFixed(1) + 'k' : repo.stargazers_count.toString(),
+            order: (index + 1).toString().padStart(2, '0')
+          }));
+
+        if (mappedProjects.length > 0) {
+          setProjects(mappedProjects);
+        }
+      } catch (error) {
+        console.error('Failed to fetch projects, using mock data.', error);
+      }
+    };
+
+    fetchGitHubProjects();
+  }, []);
 
   const handleInit = () => {
     setIsInit(true);
@@ -631,7 +669,7 @@ const App: React.FC = () => {
 
             {/* Projects Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-0 min-h-[320px]">
-              {mockProjects[lang].map(project => (
+              {projects.map(project => (
                 <ProjectCard key={project.id} project={project} />
               ))}
             </div>
