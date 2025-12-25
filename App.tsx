@@ -115,8 +115,8 @@ const Hero = ({ lang, onInit }: { lang: Language, onInit: () => void }) => (
           <span className="animate-pulse">_</span> {translations[lang].systemReady}
         </div>
         <h1 className="text-white text-5xl md:text-7xl font-black leading-[0.9] tracking-[-0.04em] uppercase">
-          {translations[lang].heroLine1}<br />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-500 hover:text-primary transition-colors duration-100 cursor-default">{translations[lang].heroLine2}</span><br />
+          <span className="block hover-shake inline-block cursor-none">{translations[lang].heroLine1}</span><br />
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-500 hover:text-primary transition-colors duration-100 cursor-none hover-shake inline-block">{translations[lang].heroLine2}</span><br />
           <span className="pl-8 md:pl-20 block text-primary">{translations[lang].heroLine3}</span>
         </h1>
         <div className="mt-8 max-w-2xl border-l-2 border-primary pl-6 py-2">
@@ -364,6 +364,8 @@ const TerminalOverlay = ({ onComplete, lang }: { onComplete: () => void, lang: L
     </div>
   );
 };
+
+
 
 // --- Custom Cursor Component ---
 const CustomCursor = () => {
