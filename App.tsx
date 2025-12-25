@@ -133,9 +133,9 @@ const Header = ({ lang, setLang }: { lang: Language, setLang: (l: Language) => v
         <span>CPU: 12%</span>
         <span className="text-green-500">NET: ONLINE</span>
       </div>
-      <a className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-sm h-8 px-4 bg-primary hover:bg-blue-700 text-white text-xs font-bold uppercase tracking-wider transition-colors duration-100" href="#">
+      <button onClick={() => window.dispatchEvent(new CustomEvent('open-cmd'))} className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-sm h-8 px-4 bg-primary hover:bg-blue-700 text-white text-xs font-bold uppercase tracking-wider transition-colors duration-100">
         <span className="truncate">{translations[lang].connect}</span>
-      </a>
+      </button>
     </div>
     <div className="md:hidden flex items-center gap-4 text-white">
       <button onClick={() => setLang(lang === 'en' ? 'tr' : 'en')} className="font-mono text-xs border border-border-dark px-2 py-1">
@@ -625,12 +625,101 @@ const LogTerminal = ({ isOpen, onClose, lang }: { isOpen: boolean, onClose: () =
   );
 };
 
+// --- Command Palette Component ---
+const CommandPalette = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) => {
+  const [input, setInput] = useState('');
+  const [history, setHistory] = useState<string[]>(['> SYSTEM_READY', '> Type "help" for available commands.']);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      setTimeout(() => inputRef.current?.focus(), 100);
+    }
+  }, [isOpen]);
+
+  const handleCommand = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      const cmd = input.trim().toLowerCase();
+      const newHistory = [...history, `user@root:~$ ${input}`];
+
+      let response = '';
+      if (cmd === 'help') {
+        response = '> Available commands: help, clear, theme [blue|red|green|purple], contact, exit';
+      } else if (cmd === 'clear') {
+        setHistory([]);
+        setInput('');
+        return;
+      } else if (cmd.startsWith('theme') || ['blue', 'red', 'green', 'purple'].includes(cmd)) {
+        const color = cmd.startsWith('theme') ? cmd.split(' ')[1] : cmd;
+        const colors: Record<string, string> = {
+          blue: '#1337ec',
+          red: '#ff0055',
+          green: '#00ff41',
+          purple: '#9d00ff'
+        };
+        if (colors[color]) {
+          document.documentElement.style.setProperty('--color-primary', colors[color]);
+          response = `> Theme set to ${color.toUpperCase()}`;
+        } else {
+          response = '> Invalid color. Try: blue, red, green, purple';
+        }
+      } else if (cmd === 'contact') {
+        window.location.href = 'mailto:contact@cheleby.dev';
+        response = '> Opening mail client...';
+      } else if (cmd === 'exit') {
+        onClose();
+        return;
+      } else if (cmd === '') {
+        response = '';
+      } else {
+        response = `> Command not found: ${cmd}`;
+      }
+
+      if (response) newHistory.push(response);
+      setHistory(newHistory);
+      setInput('');
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-[200] bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+      <div className="w-full max-w-2xl bg-[#0c0c0e] border border-primary box-shadow-primary p-6 rounded-sm relative" onClick={e => e.stopPropagation()}>
+        <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-white">
+          <span className="material-symbols-outlined">close</span>
+        </button>
+        <div className="h-64 overflow-y-auto mb-4 font-mono text-sm space-y-1 custom-scrollbar" onClick={() => inputRef.current?.focus()}>
+          {history.map((line, i) => (
+            <div key={i} className={`${line.startsWith('>') ? 'text-primary' : 'text-gray-300'}`}>{line}</div>
+          ))}
+          <div ref={el => el?.scrollIntoView({ behavior: "smooth" })} />
+        </div>
+        <div className="flex items-center gap-2 border-t border-border-dark pt-4">
+          <span className="text-primary font-bold font-mono">➜</span>
+          <input
+            ref={inputRef}
+            type="text"
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={handleCommand}
+            className="bg-transparent border-none outline-none text-white font-mono w-full focus:ring-0"
+            placeholder="Enter command..."
+            autoFocus
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // --- Main Application ---
 
 const App: React.FC = () => {
   const [lang, setLang] = useState<Language>('en');
   const [isInit, setIsInit] = useState(false);
   const [isLogsOpen, setIsLogsOpen] = useState(false);
+  const [isCmdOpen, setIsCmdOpen] = useState(false);
   const [projects, setProjects] = useState<Project[]>(mockProjects['en']);
   const [isSectorUnlocked, setIsSectorUnlocked] = useState(false); // New state for Unlock
 
@@ -686,9 +775,16 @@ const App: React.FC = () => {
     document.getElementById('projects-section')?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  useEffect(() => {
+    const handleOpenCmd = () => setIsCmdOpen(true);
+    window.addEventListener('open-cmd', handleOpenCmd);
+    return () => window.removeEventListener('open-cmd', handleOpenCmd);
+  }, []);
+
   return (
     <div className="flex flex-col min-h-screen bg-background-dark cursor-none">
       <CustomCursor />
+      <CommandPalette isOpen={isCmdOpen} onClose={() => setIsCmdOpen(false)} />
       <Header lang={lang} setLang={setLang} />
 
       <main className="flex-grow flex flex-col w-full">
