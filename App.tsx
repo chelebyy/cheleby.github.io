@@ -30,7 +30,7 @@ const translations = {
     readmeBody1: 'We are building tools that are lightweight, honest, and raw.',
     readmeBody2: 'Function over form. Transparency over polish.',
     server: 'Server',
-    marquee: 'WARNING: EXPERIMENTAL BUILDS DETECTED /// PROCEED WITH CURIOSITY /// FUNCTION OVER FORM /// TRANSPARENCY OVER POLISH /// '
+    marquee: '/// BUILDING_THE_FUTURE /// ENGINEERED_FOR_PERFORMANCE /// DIGITAL_CRAFTSMANSHIP /// DEPLOYING_IDEAS_TO_REALITY /// '
   },
   tr: {
     terminal: 'kullanici@github:~',
@@ -56,7 +56,7 @@ const translations = {
     readmeBody1: 'Hafif, durust ve saf araclar insa ediyoruz.',
     readmeBody2: 'Form yerine islev. Cilalamak yerine seffaflik.',
     server: 'Sunucu',
-    marquee: 'UYARI: DENEYSEL SURUMLER TESPIT EDILDI /// MERAKLA DEVAM EDIN /// FORM YERINE ISLEV /// CILALAMAK YERINE SEFFAFLIK /// '
+    marquee: '/// GELECEGI_INSA_EDIYORUZ /// PERFORMANS_MUHENDISLIGI /// DIJITAL_ZANAATKARLIK /// FIKIRLERI_GERCEGE_DONUSTURUYORUZ /// '
   }
 };
 
