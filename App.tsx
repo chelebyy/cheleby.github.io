@@ -269,27 +269,116 @@ const Marquee = ({ lang }: { lang: Language }) => (
   </div>
 );
 
-const Sidebar = ({ lang }: { lang: Language }) => (
-  <aside className="hidden md:flex flex-col w-64 border-r border-border-dark bg-surface-dark sticky top-[65px] h-[calc(100vh-65px)]">
-    <div className="p-6 border-b border-border-dark">
-      <h3 className="text-gray-500 font-mono text-xs mb-4 uppercase">{translations[lang].directory}</h3>
-      <nav className="flex flex-col gap-3">
-        <a className="text-white hover:text-primary font-bold flex items-center gap-2 group" href="#">
-          <span className="opacity-0 group-hover:opacity-100 transition-opacity text-primary">&gt;</span> {translations[lang].projectsLink}
-        </a>
-        <a className="text-gray-400 hover:text-white font-medium flex items-center gap-2 group transition-colors" href="#">
-          <span className="opacity-0 group-hover:opacity-100 transition-opacity text-primary">&gt;</span> {translations[lang].manifestoLink}
-        </a>
-        <a className="text-gray-400 hover:text-white font-medium flex items-center gap-2 group transition-colors" href="#">
-          <span className="opacity-0 group-hover:opacity-100 transition-opacity text-primary">&gt;</span> {translations[lang].changelogLink}
-        </a>
-      </nav>
-    </div>
-    <div className="p-6 mt-auto">
-      {/* Location widget moved to Hero */}
-    </div>
-  </aside>
-);
+const Sidebar = ({ lang }: { lang: Language }) => {
+  const scrollToSection = (id: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  return (
+    <aside className="hidden md:flex flex-col w-64 border-r border-border-dark bg-[#0c0c0e] sticky top-[65px] h-[calc(100vh-65px)] font-mono text-sm leading-6 select-none overflow-y-auto custom-scrollbar">
+      <div className="p-6">
+        <h3 className="text-gray-500 text-[10px] mb-4 uppercase tracking-widest pl-2 border-l border-primary/50">{translations[lang].directory} ~/root</h3>
+
+        {/* Tree Structure */}
+        <div className="flex flex-col text-gray-400">
+
+          {/* Projects Directory */}
+          <div className="relative pl-4">
+            {/* Branch line */}
+            <div className="absolute left-0 top-0 bottom-0 w-px bg-gray-800"></div>
+
+            <div className="relative group">
+              <div className="absolute left-[-16px] top-3 w-4 h-px bg-gray-800"></div>
+              <a
+                href="#projects-section"
+                onClick={(e) => scrollToSection('projects-section', e)}
+                className="flex items-center gap-2 hover:text-white hover:bg-white/5 py-1 px-2 rounded-sm transition-colors"
+              >
+                <span className="material-symbols-outlined text-[16px] text-blue-400 group-hover:text-blue-300">folder</span>
+                <span className="group-hover:translate-x-1 transition-transform">{translations[lang].projectsLink.replace('./', '')}</span>
+              </a>
+            </div>
+          </div>
+
+          {/* System Directory */}
+          <div className="relative pl-4 pt-1">
+            <div className="absolute left-0 top-0 bottom-0 w-px bg-gray-800"></div>
+
+            <div className="relative group">
+              <div className="absolute left-[-16px] top-3 w-4 h-px bg-gray-800"></div>
+              <div className="flex items-center gap-2 py-1 px-2 text-gray-500">
+                <span className="material-symbols-outlined text-[16px]">folder_open</span>
+                <span>system</span>
+              </div>
+            </div>
+
+            {/* Sub-item: Manifesto */}
+            <div className="relative pl-6 group">
+              <div className="absolute left-[-8px] top-0 bottom-1/2 w-px bg-gray-800"></div>
+              <div className="absolute left-[-8px] top-3 w-4 h-px bg-gray-800"></div>
+
+              <a
+                href="#manifesto-section"
+                onClick={(e) => scrollToSection('manifesto-section', e)}
+                className="flex items-center gap-2 hover:text-white hover:bg-white/5 py-1 px-2 rounded-sm transition-colors"
+              >
+                <span className="material-symbols-outlined text-[16px] text-yellow-400 group-hover:text-yellow-300">description</span>
+                <span className="group-hover:translate-x-1 transition-transform">manifesto.md</span>
+              </a>
+            </div>
+          </div>
+
+          {/* Logs Directory */}
+          <div className="relative pl-4 pt-1">
+            <div className="absolute left-0 top-0 bottom-1/2 w-px bg-gray-800"></div>
+
+            <div className="relative group">
+              <div className="absolute left-[-16px] top-3 w-4 h-px bg-gray-800"></div>
+              <div className="flex items-center gap-2 py-1 px-2 text-gray-500">
+                <span className="material-symbols-outlined text-[16px]">folder_open</span>
+                <span>var/log</span>
+              </div>
+            </div>
+
+            {/* Sub-item: Changelog */}
+            <div className="relative pl-6 group">
+              <div className="absolute left-[-8px] top-0 bottom-1/2 w-px bg-gray-800"></div>
+              <div className="absolute left-[-8px] top-3 w-4 h-px bg-gray-800"></div>
+
+              <a
+                href="#activity-section"
+                onClick={(e) => scrollToSection('activity-section', e)}
+                className="flex items-center gap-2 hover:text-white hover:bg-white/5 py-1 px-2 rounded-sm transition-colors"
+              >
+                <span className="material-symbols-outlined text-[16px] text-gray-500 group-hover:text-gray-300">terminal</span>
+                <span className="group-hover:translate-x-1 transition-transform">sys.log</span>
+              </a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      {/* Footer System Stats */}
+      <div className="mt-auto p-6 border-t border-border-dark bg-[#0a0a0c]">
+        <div className="flex flex-col gap-2 font-mono text-[10px] text-gray-600">
+          <div className="flex justify-between">
+            <span>/dev/disk1</span>
+            <span className="text-green-500">MOUNTED</span>
+          </div>
+          <div className="w-full h-1 bg-gray-800 rounded-full overflow-hidden">
+            <div className="w-[45%] h-full bg-primary/50"></div>
+          </div>
+          <div className="flex justify-between mt-1">
+            <span>UPTIME</span>
+            <span>04:20:01</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+  );
+};
 
 const ProjectCard: React.FC<{ project: Project }> = ({ project }) => (
   <a className="group border-b border-r border-border-dark bg-surface-dark p-8 flex flex-col justify-between h-[320px] border-glitch relative overflow-hidden flex-shrink-0" href={project.url || '#'}>
@@ -327,7 +416,7 @@ const ProjectCard: React.FC<{ project: Project }> = ({ project }) => (
 const Readme = ({ lang }: { lang: Language }) => {
   const t = translations[lang];
   return (
-    <div className="border-b border-border-dark p-8 md:p-12 w-full">
+    <div id="manifesto-section" className="border-b border-border-dark p-8 md:p-12 w-full">
       <h2 className="text-white text-xl font-bold mb-6 flex items-center gap-3">
         <span className="material-symbols-outlined text-primary">terminal</span>
         {t.manifestoTitle}
@@ -353,7 +442,7 @@ const Readme = ({ lang }: { lang: Language }) => {
 };
 
 const ActivityLogList = ({ logs, lang }: { logs: ActivityLog[], lang: Language }) => (
-  <div className="p-8 md:p-12">
+  <div id="activity-section" className="p-8 md:p-12">
     <h2 className="text-white text-xl font-bold mb-6 flex items-center gap-3">
       <span className="material-symbols-outlined text-primary">history</span>
       {translations[lang].recentActivity}
