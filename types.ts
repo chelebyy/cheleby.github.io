@@ -16,5 +16,6 @@ export interface ActivityLog {
   type: 'commit' | 'merge' | 'deploy' | 'alert';
   hash?: string;
   message: string;
+  url?: string;
 }
 

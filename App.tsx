@@ -505,19 +505,22 @@ const ActivityLogList = ({ logs, lang }: { logs: ActivityLog[], lang: Language }
     </h2>
     <ul className="space-y-0">
       {logs.map((log, idx) => (
-        <li key={idx} className="flex flex-col md:flex-row md:items-center gap-4 py-4 border-b border-dashed border-gray-800 text-sm group hover:bg-white/5 px-2 -mx-2 transition-colors rounded-sm">
-          <span className="font-mono text-gray-500 text-xs min-w-[120px]">{log.timestamp}</span>
-          {log.hash && (
-            <span className="font-bold text-white text-primary group-hover:text-primary whitespace-nowrap">
-              {log.type} {log.hash}
-            </span>
-          )}
-          {!log.hash && (
-            <span className="font-bold text-white text-primary group-hover:text-primary whitespace-nowrap uppercase">
-              {log.type}
-            </span>
-          )}
-          <span className="text-gray-400">{log.message}</span>
+        <li key={idx} className="block group">
+          <a href={log.url} target="_blank" rel="noopener noreferrer" className={`flex flex-col md:flex-row md:items-center gap-4 py-4 border-b border-dashed border-gray-800 text-sm hover:bg-white/5 px-2 -mx-2 transition-colors rounded-sm ${log.url ? 'cursor-pointer' : ''}`}>
+            <span className="font-mono text-gray-500 text-xs min-w-[120px]">{log.timestamp}</span>
+            {log.hash && (
+              <span className="font-bold text-white text-primary group-hover:text-primary whitespace-nowrap">
+                {log.type} {log.hash}
+              </span>
+            )}
+            {!log.hash && (
+              <span className="font-bold text-white text-primary group-hover:text-primary whitespace-nowrap uppercase">
+                {log.type}
+              </span>
+            )}
+            <span className="text-gray-400 truncate">{log.message}</span>
+            {log.url && <span className="hidden group-hover:inline-block material-symbols-outlined text-xs text-gray-600 ml-auto">open_in_new</span>}
+          </a>
         </li>
       ))}
     </ul>
@@ -1142,6 +1145,7 @@ const App: React.FC = () => {
   const [matrixEnabled, setMatrixEnabled] = useState(false); // Matrix State
   const [projects, setProjects] = useState<Project[]>(mockProjects['en']);
   const [userData, setUserData] = useState<any>(null);  // Store fetched user data
+  const [activityLogs, setActivityLogs] = useState<ActivityLog[]>(mockLogs['en']); // Initial mock, then real
 
   // Secure Sector States
   const [isSectorUnlocked, setIsSectorUnlocked] = useState(false);
@@ -1165,47 +1169,84 @@ const App: React.FC = () => {
   useEffect(() => {
     const fetchGitHubProjects = async () => {
       try {
-        // Fetch user data first or in parallel
+        // Fetch user data
         const userRes = await fetch('https://api.github.com/users/chelebyy');
         if (userRes.ok) {
           const user = await userRes.json();
           setUserData(user);
         }
 
+        // Fetch Repos
         const response = await fetch('https://api.github.com/users/chelebyy/repos?sort=pushed&per_page=100');
-
-        if (!response.ok) {
-          // Handle rate limit or other errors gracefully by keeping mock data
-          console.warn('GitHub API Request Failed', response.status);
-          return;
+        if (response.ok) {
+          const data = await response.json();
+          if (Array.isArray(data)) {
+            const mappedProjects = data
+              .filter((repo: any) => !repo.fork)
+              .sort((a: any, b: any) => b.stargazers_count - a.stargazers_count)
+              .slice(0, 50)
+              .map((repo: any, index: number) => ({
+                id: repo.id.toString(),
+                name: repo.name,
+                description: repo.description || 'No description provided.',
+                tags: [repo.language, 'GitHub'].filter(Boolean).slice(0, 3),
+                stars: repo.stargazers_count >= 1000 ? (repo.stargazers_count / 1000).toFixed(1) + 'k' : repo.stargazers_count.toString(),
+                order: (index + 1).toString().padStart(2, '0'),
+                url: repo.html_url
+              }));
+            if (mappedProjects.length > 0) setProjects(mappedProjects);
+          }
         }
 
-        const data = await response.json();
+        // Fetch Events (Activity Log)
+        const eventsRes = await fetch('https://api.github.com/users/chelebyy/events');
+        if (eventsRes.ok) {
+          const events = await eventsRes.json();
+          const mappedLogs: ActivityLog[] = events.slice(0, 10).map((event: any) => {
+            let message = '';
+            let type: any = 'commit';
+            let hash = '';
+            let url = '';
 
-        if (!Array.isArray(data)) {
-          console.warn('GitHub API Response is not an array');
-          return;
+            if (event.type === 'PushEvent') {
+              type = 'commit';
+              const commitSha = event.payload.commits?.[0]?.sha || event.payload.head;
+              hash = commitSha ? commitSha.substring(0, 7) : 'update';
+              message = event.payload.commits?.[0]?.message || 'Pushed to ' + event.repo.name;
+              url = commitSha
+                ? `https://github.com/${event.repo.name}/commit/${commitSha}`
+                : `https://github.com/${event.repo.name}`;
+            } else if (event.type === 'CreateEvent') {
+              type = 'deploy';
+              message = `Created ${event.payload.ref_type} in ${event.repo.name}`;
+              url = `https://github.com/${event.repo.name}`;
+            } else if (event.type === 'PullRequestEvent') {
+              type = 'merge';
+              message = `${event.payload.action} PR in ${event.repo.name}`;
+              url = event.payload.pull_request?.html_url;
+            } else if (event.type === 'WatchEvent') {
+              type = 'alert';
+              message = `Starred repository ${event.repo.name}`;
+              url = `https://github.com/${event.repo.name}`;
+            } else {
+              type = 'deploy';
+              message = `Activity in ${event.repo.name}`;
+              url = `https://github.com/${event.repo.name}`;
+            }
+
+            return {
+              timestamp: new Date(event.created_at).toLocaleString('tr-TR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+              type,
+              hash: hash !== 'unknown' && hash ? hash : undefined,
+              message,
+              url
+            };
+          });
+          setActivityLogs(mappedLogs);
         }
 
-        const mappedProjects = data
-          .filter((repo: any) => !repo.fork) // Filter only forks
-          .sort((a: any, b: any) => b.stargazers_count - a.stargazers_count) // Sort by stars
-          .slice(0, 50) // Fetch plenty of projects for the scrollable list
-          .map((repo: any, index: number) => ({
-            id: repo.id.toString(),
-            name: repo.name,
-            description: repo.description || 'No description provided.',
-            tags: [repo.language, 'GitHub'].filter(Boolean).slice(0, 3),
-            stars: repo.stargazers_count >= 1000 ? (repo.stargazers_count / 1000).toFixed(1) + 'k' : repo.stargazers_count.toString(),
-            order: (index + 1).toString().padStart(2, '0'),
-            url: repo.html_url
-          }));
-
-        if (mappedProjects.length > 0) {
-          setProjects(mappedProjects);
-        }
       } catch (error) {
-        console.error('Failed to fetch projects, using mock data.', error);
+        console.error('Failed to fetch GitHub data.', error);
       }
     };
 
@@ -1387,7 +1428,7 @@ const App: React.FC = () => {
 
             <Readme lang={lang} />
 
-            <ActivityLogList logs={mockLogs[lang]} lang={lang} />
+            <ActivityLogList logs={activityLogs} lang={lang} />
           </div>
         </div>
       </main>

@@ -1,20 +1,77 @@
 <div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+  <h3>DIGITAL_ARTIFACTS_OS // SYSTEM_READY</h3>
+  <p>A brutalist, cyberpunk-inspired operating system portfolio interface.</p>
+
+  [![React](https://img.shields.io/badge/React-19.0-blue?style=flat-square&logo=react)](https://react.dev/)
+  [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
+  [![Tailwind CSS](https://img.shields.io/badge/Styled_with-Tailwind-38bdf8?style=flat-square&logo=tailwindcss)](https://tailwindcss.com/)
+  [![Vite](https://img.shields.io/badge/Bundled_with-Vite-646cff?style=flat-square&logo=vite)](https://vitejs.dev/)
+  [![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
+
 </div>
 
-# Run and deploy your AI Studio app
+---
 
-This contains everything you need to run your app locally.
+## ⚡ System Overview
 
-View your app in AI Studio: https://ai.studio/apps/drive/1BUYE8QrRkCstqUoOZu_3hKQ_hEidySEQ
+**Digital Artifacts OS** is not just a portfolio website; it's an interactive terminal environment designed to showcase engineering capabilities through raw functionality and aesthetics. It strips away the noise of the modern web, focusing on performance, interactivity, and a distinct "hacker" vibe.
 
-## Run Locally
+### 🚀 Key Features
 
-**Prerequisites:**  Node.js
+* **🖥️ Command Palette (God Mode):**
+  * Press `Ctrl + K` or click the "Connect Repo" button to access the system terminal.
+  * Execute commands like `matrix`, `neofetch`, `theme`, `whoami`.
+  * **Easter Eggs:** Try asking nicely with `sudo please` (or `sudo lütfen` in TR).
 
+* **🟢 Matrix Mode:**
+  * Toggle a fully rendered HTML5 Canvas Matrix Rain effect via the command palette.
+  * *Command:* `matrix`
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+* **🔒 Secure Sector:**
+  * A hidden, password-protected area for sensitive or "classified" projects.
+  * Features a cryptic unlock mechanism related to the answer to life, the universe, and everything.
+
+* **🌍 Localization Support:**
+  * Full bilingual support for **English (EN)** and **Turkish (TR)**.
+  * Instant language toggling that updates all system logs, UI elements, and even command responses.
+
+* **📡 Real-Time Data:**
+  * **Live Metrics:** Real-time RAM fluctuations, CPU usage simulation, and Network heartbeat.
+  * **GitHub Integration:** Fetches *real* commit history, push events, and repositories directly from the GitHub API.
+
+## 🛠️ Installation & Boot
+
+Run the system locally on your machine:
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/chelebyy/chelebyy.github.io.git
+
+# 2. Enter the directory
+cd chelebyy.github.io
+
+# 3. Install dependencies
+npm install
+
+# 4. Initialize System
+npm run dev
+```
+
+## ⌨️ System Commands
+
+Access the terminal via `Ctrl + K` and try these:
+
+| Command | Description |
+| :--- | :--- |
+| `help` | Lists available commands |
+| `matrix` | Toggles the Matrix Rain visual effect |
+| `neofetch` / `sys` | Displays detailed system specification |
+| `theme [color]` | Changes system accent color (blue, red, green, purple) |
+| `contact` | Initiates communication protocol |
+| `whoami` | displays current user identity |
+
+---
+
+<div align="center">
+  <sub>Designed & Engineered by <a href="https://github.com/chelebyy">@chelebyy</a></sub>
+</div>
