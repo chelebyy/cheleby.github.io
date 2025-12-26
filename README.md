@@ -70,6 +70,14 @@ Access the terminal via `Ctrl + K` and try these:
 | `contact` | Initiates communication protocol |
 | `whoami` | displays current user identity |
 
+## 🤖 Powered By
+
+This project was built with the assistance of next-generation AI agents:
+
+* **Gemini 3.0 Pro:** Rapid Prototyping & UI Generation
+* **Antigravity:** Code Architecture & Agentic Workflow
+* **Claude:** Deep Reasoning & Refactoring
+
 ---
 
 <div align="center">
