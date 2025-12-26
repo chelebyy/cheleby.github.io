@@ -7,7 +7,7 @@ import { mockProjects, mockLogs } from './services/geminiService';
 
 const translations = {
   en: {
-    terminal: 'user@github:~',
+    terminal: 'chelebyy@root:~',
     connect: 'Connect_Repo',
     systemReady: 'SYSTEM_READY',
     heroLine1: 'Building',
@@ -59,10 +59,16 @@ const translations = {
     cmdInvalidColor: 'Invalid color. Try: blue, red, green, purple',
     cmdOpenMail: 'Opening mail client...',
     cmdNotFound: 'Command not found:',
-    cmdPlaceholder: 'Enter command...'
+    cmdPlaceholder: 'Enter command...',
+    // Control Panel Translations
+    cpTitle: 'SYSTEM_CONTROL_CENTER',
+    cpIdentity: 'IDENTITY_MODULE',
+    cpSettings: 'SYSTEM_SETTINGS',
+    cpCrtEffect: 'CRT_SCANLINE_EFFECT',
+    cpAnimSpeed: 'ANIMATION_SPEED'
   },
   tr: {
-    terminal: 'kullanici@github:~',
+    terminal: 'chelebyy@root:~',
     connect: 'Depoyu_Bagla',
     systemReady: 'SISTEM_HAZIR',
     heroLine1: 'Dijital',
@@ -114,55 +120,82 @@ const translations = {
     cmdInvalidColor: 'Gecersiz renk. Deneyin: blue, red, green, purple',
     cmdOpenMail: 'Mail istemcisi aciliyor...',
     cmdNotFound: 'Komut bulunamadi:',
-    cmdPlaceholder: 'Komut girin...'
+    cmdPlaceholder: 'Komut girin...',
+    // Control Panel Translations
+    cpTitle: 'SISTEM_KONTROL_MERKEZI',
+    cpIdentity: 'KIMLIK_MODULU',
+    cpSettings: 'SISTEM_AYARLARI',
+    cpCrtEffect: 'CRT_TARAMA_EFEKTI',
+    cpAnimSpeed: 'ANIMASYON_HIZI'
   }
 };
 
 // --- Helper Components ---
 
-const Header = ({ lang, setLang }: { lang: Language, setLang: (l: Language) => void }) => (
-  <header className="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap border-b border-solid border-border-dark bg-[#111218]/90 backdrop-blur-sm px-4 py-3 md:px-10">
-    <div className="flex items-center gap-4 text-white">
-      <div className="size-5 text-primary">
-        <span className="material-symbols-outlined text-[20px] leading-none">terminal</span>
+const Header = ({ lang, setLang, onOpenControlPanel }: { lang: Language, setLang: (l: Language) => void, onOpenControlPanel: () => void }) => {
+  const [displayText, setDisplayText] = useState('');
+  const fullText = translations[lang].terminal;
+
+  useEffect(() => {
+    let index = 0;
+    setDisplayText('');
+    const interval = setInterval(() => {
+      setDisplayText(fullText.substring(0, index + 1));
+      index++;
+      if (index === fullText.length) clearInterval(interval);
+    }, 100);
+    return () => clearInterval(interval);
+  }, [fullText, lang]);
+
+  return (
+    <header className="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap border-b border-solid border-border-dark bg-[#111218]/90 backdrop-blur-sm px-4 py-3 md:px-10">
+      <div
+        onClick={onOpenControlPanel}
+        className="flex items-center gap-4 text-white cursor-pointer group select-none"
+        title="Open System Control"
+      >
+        <div className="size-5 text-primary group-hover:text-white transition-colors">
+          <span className="material-symbols-outlined text-[20px] leading-none">terminal</span>
+        </div>
+        <h2 className="text-white text-base md:text-lg font-bold leading-tight tracking-[-0.015em] font-mono group-hover:text-primary transition-colors">
+          {displayText}
+          <span className="animate-pulse">_</span>
+        </h2>
       </div>
-      <h2 className="text-white text-base md:text-lg font-bold leading-tight tracking-[-0.015em] font-mono">
-        {translations[lang].terminal}
-      </h2>
-    </div>
-    <div className="hidden md:flex flex-1 justify-end gap-8 items-center">
-      <div className="flex items-center gap-6 font-mono text-xs text-gray-400 border border-border-dark px-3 py-1 rounded-sm">
-        <button
-          onClick={() => setLang('en')}
-          className={`${lang === 'en' ? 'text-primary font-bold' : 'text-gray-600'} hover:text-white transition-colors`}
-        >
-          EN
+      <div className="hidden md:flex flex-1 justify-end gap-8 items-center">
+        <div className="flex items-center gap-6 font-mono text-xs text-gray-400 border border-border-dark px-3 py-1 rounded-sm">
+          <button
+            onClick={() => setLang('en')}
+            className={`${lang === 'en' ? 'text-primary font-bold' : 'text-gray-600'} hover:text-white transition-colors`}
+          >
+            EN
+          </button>
+          <span className="text-gray-800">/</span>
+          <button
+            onClick={() => setLang('tr')}
+            className={`${lang === 'tr' ? 'text-primary font-bold' : 'text-gray-600'} hover:text-white transition-colors`}
+          >
+            TR
+          </button>
+        </div>
+        <div className="flex items-center gap-6 font-mono text-xs text-gray-400">
+          <span>MEM: 64%</span>
+          <span>CPU: 12%</span>
+          <span className="text-green-500">NET: ONLINE</span>
+        </div>
+        <button onClick={() => window.dispatchEvent(new CustomEvent('open-cmd'))} className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-sm h-8 px-4 bg-primary hover:bg-blue-700 text-white text-xs font-bold uppercase tracking-wider transition-colors duration-100">
+          <span className="truncate">{translations[lang].connect}</span>
         </button>
-        <span className="text-gray-800">/</span>
-        <button
-          onClick={() => setLang('tr')}
-          className={`${lang === 'tr' ? 'text-primary font-bold' : 'text-gray-600'} hover:text-white transition-colors`}
-        >
-          TR
+      </div>
+      <div className="md:hidden flex items-center gap-4 text-white">
+        <button onClick={() => setLang(lang === 'en' ? 'tr' : 'en')} className="font-mono text-xs border border-border-dark px-2 py-1">
+          {lang.toUpperCase()}
         </button>
+        <span className="material-symbols-outlined">menu</span>
       </div>
-      <div className="flex items-center gap-6 font-mono text-xs text-gray-400">
-        <span>MEM: 64%</span>
-        <span>CPU: 12%</span>
-        <span className="text-green-500">NET: ONLINE</span>
-      </div>
-      <button onClick={() => window.dispatchEvent(new CustomEvent('open-cmd'))} className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-sm h-8 px-4 bg-primary hover:bg-blue-700 text-white text-xs font-bold uppercase tracking-wider transition-colors duration-100">
-        <span className="truncate">{translations[lang].connect}</span>
-      </button>
-    </div>
-    <div className="md:hidden flex items-center gap-4 text-white">
-      <button onClick={() => setLang(lang === 'en' ? 'tr' : 'en')} className="font-mono text-xs border border-border-dark px-2 py-1">
-        {lang.toUpperCase()}
-      </button>
-      <span className="material-symbols-outlined">menu</span>
-    </div>
-  </header>
-);
+    </header>
+  );
+};
 
 const Hero = ({ lang, onInit, onOpenLogs }: { lang: Language, onInit: () => void, onOpenLogs: () => void }) => (
   <section className="border-b border-border-dark bg-surface-dark relative overflow-hidden">
@@ -644,6 +677,109 @@ const LogTerminal = ({ isOpen, onClose, lang }: { isOpen: boolean, onClose: () =
 };
 
 // --- Command Palette Component ---
+// --- Control Panel Component ---
+const ControlPanel = ({
+  isOpen,
+  onClose,
+  lang,
+  crtEnabled,
+  setCrtEnabled,
+  user
+}: {
+  isOpen: boolean,
+  onClose: () => void,
+  lang: Language,
+  crtEnabled: boolean,
+  setCrtEnabled: (enabled: boolean) => void,
+  user: any
+}) => {
+  const t = translations[lang];
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-[200] bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+      {/* Click outside to close */}
+      <div className="absolute inset-0" onClick={onClose}></div>
+
+      <div className="w-full max-w-md bg-[#0c0c0e] border border-border-dark box-shadow-primary p-6 rounded-sm relative overflow-hidden" onClick={e => e.stopPropagation()}>
+        {/* Decorative Grid */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none"></div>
+
+        {/* Header */}
+        <div className="flex justify-between items-center mb-8 relative z-10 border-b border-white/5 pb-4">
+          <h2 className="text-white font-bold font-mono tracking-widest uppercase flex items-center gap-2">
+            <span className="material-symbols-outlined text-primary">admin_panel_settings</span>
+            {t.cpTitle}
+          </h2>
+          <button onClick={onClose} className="text-gray-500 hover:text-white transition-colors">
+            <span className="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        {/* Identity Module */}
+        <div className="mb-8 relative z-10">
+          <h3 className="text-xs text-gray-500 font-mono uppercase mb-4 pl-2 border-l-2 border-primary">{t.cpIdentity}</h3>
+
+          <div className="flex items-center gap-6 bg-white/5 p-4 rounded-sm border border-white/5 hover:border-primary/30 transition-colors">
+            <div className="relative">
+              <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-gray-700">
+                <img
+                  src={user?.avatar_url || 'https://github.com/chelebyy.png'}
+                  alt="Avatar"
+                  className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
+                />
+              </div>
+              <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border border-black"></div>
+            </div>
+
+            <div>
+              <h4 className="text-white font-bold text-lg leading-none mb-1">@{user?.login || 'chelebyy'}</h4>
+              <p className="text-gray-400 text-xs font-mono mb-2">{user?.bio || 'Full Stack Developer'}</p>
+
+              <div className="flex gap-4 text-xs font-mono text-gray-500">
+                <span className="flex items-center gap-1">
+                  <span className="material-symbols-outlined text-[14px]">folder</span>
+                  {user?.public_repos || '0'}
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="material-symbols-outlined text-[14px]">group</span>
+                  {user?.followers || '0'}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* System Settings */}
+        <div className="relative z-10">
+          <h3 className="text-xs text-gray-500 font-mono uppercase mb-4 pl-2 border-l-2 border-primary">{t.cpSettings}</h3>
+
+          <div className="flex flex-col gap-3">
+            <label className="flex items-center justify-between p-3 bg-white/5 rounded-sm hover:bg-white/10 cursor-pointer transition-colors group">
+              <span className="text-gray-300 font-mono text-sm group-hover:text-white">{t.cpCrtEffect}</span>
+              <div className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="sr-only peer"
+                  checked={crtEnabled}
+                  onChange={(e) => setCrtEnabled(e.target.checked)}
+                />
+                <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        {/* Footer info */}
+        <div className="mt-8 text-center">
+          <p className="text-[10px] text-gray-600 font-mono uppercase">System Integrity: 100% // Secure Connection</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const CommandPalette = ({ isOpen, onClose, lang }: { isOpen: boolean, onClose: () => void, lang: Language }) => {
   const t = translations[lang];
   const [input, setInput] = useState('');
@@ -660,7 +796,7 @@ const CommandPalette = ({ isOpen, onClose, lang }: { isOpen: boolean, onClose: (
   const handleCommand = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       const cmd = input.trim().toLowerCase();
-      const newHistory = [...history, `user@root:~$ ${input}`];
+      const newHistory = [...history, `chelebyy@root:~$ ${input}`];
 
       let response = '';
       if (cmd === 'help') {
@@ -740,12 +876,22 @@ const App: React.FC = () => {
   const [isInit, setIsInit] = useState(false);
   const [isLogsOpen, setIsLogsOpen] = useState(false);
   const [isCmdOpen, setIsCmdOpen] = useState(false);
+  const [isControlPanelOpen, setIsControlPanelOpen] = useState(false);
+  const [crtEnabled, setCrtEnabled] = useState(false);
   const [projects, setProjects] = useState<Project[]>(mockProjects['en']);
-  const [isSectorUnlocked, setIsSectorUnlocked] = useState(false); // New state for Unlock
+  const [userData, setUserData] = useState<any>(null); // Store fetched user data
+  const [isSectorUnlocked, setIsSectorUnlocked] = useState(false);
 
   useEffect(() => {
     const fetchGitHubProjects = async () => {
       try {
+        // Fetch user data first or in parallel
+        const userRes = await fetch('https://api.github.com/users/chelebyy');
+        if (userRes.ok) {
+          const user = await userRes.json();
+          setUserData(user);
+        }
+
         const response = await fetch('https://api.github.com/users/chelebyy/repos?sort=pushed&per_page=100');
 
         if (!response.ok) {
@@ -802,10 +948,28 @@ const App: React.FC = () => {
   }, []);
 
   return (
-    <div className="flex flex-col min-h-screen bg-background-dark cursor-none">
+    <div className="flex flex-col min-h-screen bg-background-dark cursor-none relative overflow-hidden">
       <CustomCursor />
+
+      {/* CRT Effect Overlay */}
+      {crtEnabled && (
+        <div className="fixed inset-0 pointer-events-none z-[9998] overflow-hidden">
+          <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.1)_50%),linear-gradient(90deg,rgba(255,0,0,0.03),rgba(0,255,0,0.01),rgba(0,0,255,0.03))] bg-[length:100%_3px,3px_100%] pointer-events-none"></div>
+          <div className="absolute inset-0 bg-[radial-gradient(circle,rgba(0,0,0,0)_60%,rgba(0,0,0,0.4)_100%)]"></div>
+        </div>
+      )}
+
+      <ControlPanel
+        isOpen={isControlPanelOpen}
+        onClose={() => setIsControlPanelOpen(false)}
+        lang={lang}
+        crtEnabled={crtEnabled}
+        setCrtEnabled={setCrtEnabled}
+        user={userData}
+      />
+
       <CommandPalette isOpen={isCmdOpen} onClose={() => setIsCmdOpen(false)} lang={lang} />
-      <Header lang={lang} setLang={setLang} />
+      <Header lang={lang} setLang={setLang} onOpenControlPanel={() => setIsControlPanelOpen(true)} />
 
       <main className="flex-grow flex flex-col w-full">
         <LogTerminal isOpen={isLogsOpen} onClose={() => setIsLogsOpen(false)} lang={lang} />
