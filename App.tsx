@@ -1145,7 +1145,10 @@ const App: React.FC = () => {
   const [matrixEnabled, setMatrixEnabled] = useState(false); // Matrix State
   const [projects, setProjects] = useState<Project[]>(mockProjects['en']);
   const [userData, setUserData] = useState<any>(null);  // Store fetched user data
-  const [activityLogs, setActivityLogs] = useState<ActivityLog[]>(mockLogs['en']); // Initial mock, then real
+  // Initial state is "Scanning..." to indicate live data fetching
+  const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([
+    { timestamp: '---', type: 'system', hash: '...', message: 'Scanning deep space frequencies...', url: '' }
+  ]);
 
   // Secure Sector States
   const [isSectorUnlocked, setIsSectorUnlocked] = useState(false);
@@ -1199,50 +1202,62 @@ const App: React.FC = () => {
         }
 
         // Fetch Events (Activity Log)
-        const eventsRes = await fetch('https://api.github.com/users/chelebyy/events');
-        if (eventsRes.ok) {
-          const events = await eventsRes.json();
-          const mappedLogs: ActivityLog[] = events.slice(0, 10).map((event: any) => {
-            let message = '';
-            let type: any = 'commit';
-            let hash = '';
-            let url = '';
+        try {
+          const eventsRes = await fetch('https://api.github.com/users/chelebyy/events');
 
-            if (event.type === 'PushEvent') {
-              type = 'commit';
-              const commitSha = event.payload.commits?.[0]?.sha || event.payload.head;
-              hash = commitSha ? commitSha.substring(0, 7) : 'update';
-              message = event.payload.commits?.[0]?.message || 'Pushed to ' + event.repo.name;
-              url = commitSha
-                ? `https://github.com/${event.repo.name}/commit/${commitSha}`
-                : `https://github.com/${event.repo.name}`;
-            } else if (event.type === 'CreateEvent') {
-              type = 'deploy';
-              message = `Created ${event.payload.ref_type} in ${event.repo.name}`;
-              url = `https://github.com/${event.repo.name}`;
-            } else if (event.type === 'PullRequestEvent') {
-              type = 'merge';
-              message = `${event.payload.action} PR in ${event.repo.name}`;
-              url = event.payload.pull_request?.html_url;
-            } else if (event.type === 'WatchEvent') {
-              type = 'alert';
-              message = `Starred repository ${event.repo.name}`;
-              url = `https://github.com/${event.repo.name}`;
+          if (eventsRes.ok) {
+            const events = await eventsRes.json();
+
+            // Filter for Releases and Tag Creations
+            const releaseEvents = events.filter((event: any) =>
+              event.type === 'ReleaseEvent' ||
+              (event.type === 'CreateEvent' && event.payload.ref_type === 'tag')
+            );
+
+            if (releaseEvents.length > 0) {
+              const mappedLogs: ActivityLog[] = releaseEvents.slice(0, 10).map((event: any) => {
+                let message = '';
+                let type: any = 'release';
+                let hash = '';
+                let url = '';
+
+                if (event.type === 'ReleaseEvent') {
+                  hash = event.payload.release.tag_name;
+                  message = event.payload.release.name || 'New Release Deployed';
+                  url = event.payload.release.html_url;
+                } else {
+                  hash = event.payload.ref;
+                  message = `Tag ${event.payload.ref} created`;
+                  url = `https://github.com/${event.repo.name}/releases/tag/${event.payload.ref}`;
+                }
+
+                return {
+                  timestamp: new Date(event.created_at).toISOString().replace('T', ' ').substring(0, 16),
+                  type,
+                  hash,
+                  message,
+                  url
+                };
+              });
+              setActivityLogs(mappedLogs);
             } else {
-              type = 'deploy';
-              message = `Activity in ${event.repo.name}`;
-              url = `https://github.com/${event.repo.name}`;
+              // No recent releases found in API, fallback to manual v1.0.0 entry
+              throw new Error("No releases found");
             }
-
-            return {
-              timestamp: new Date(event.created_at).toLocaleString('tr-TR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
-              type,
-              hash: hash !== 'unknown' && hash ? hash : undefined,
-              message,
-              url
-            };
-          });
-          setActivityLogs(mappedLogs);
+          } else {
+            throw new Error("API Error");
+          }
+        } catch (error) {
+          // Fallback for Rate Limit or Empty Data
+          setActivityLogs([
+            {
+              timestamp: new Date().toISOString().replace('T', ' ').substring(0, 16),
+              type: 'release',
+              hash: 'v1.0.0',
+              message: 'Official Launch - Matrix Mode & Secure Sector',
+              url: 'https://github.com/chelebyy/chelebyy.github.io/releases/tag/v1.0.0'
+            }
+          ]);
         }
 
       } catch (error) {
