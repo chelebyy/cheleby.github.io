@@ -43,6 +43,15 @@
   * A hidden, password-protected area for sensitive or "classified" projects.
   * Features a cryptic unlock mechanism related to the answer to life, the universe, and everything.
 
+* **🎬 Digital Awakening (Boot Sequence):**
+  * Cinematic "System Boot" intro with BIOS checks, authentication, and glitch effects.
+  * Runs once per session to maintain immersion without annoyance.
+  * *Re-experience:* Type `reboot` in the terminal to restart the sequence.
+
+* **📊 Active System Monitor:**
+  * A redesigned protocol area visualizing live system modules (Docker, AI Model, Firewall).
+  * Dynamic status indicators (Running, Optimized, Filtering) that react to system state.
+
 * **🌍 Localization Support:**
   * Full bilingual support for **English (EN)** and **Turkish (TR)**.
   * Instant language toggling that updates all system logs, UI elements, and even command responses.
@@ -80,6 +89,7 @@ Access the terminal via `Ctrl + K` and try these:
 | `neofetch` / `sys` | Displays detailed system specification |
 | `theme [color]` | Changes system accent color (blue, red, green, purple) |
 | `contact` | Initiates communication protocol |
+| `reboot` / `restart` | Re-initiates the System Boot Sequence |
 | `whoami` | displays current user identity |
 
 ## 🤖 Powered By
